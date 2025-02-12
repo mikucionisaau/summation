@@ -10,15 +10,14 @@ jobs:
   build:
     strategy:
       matrix:
-        config: [ {os: ubuntu-latest, cc: cc, cxx: c++}, {os: ubuntu-latest, cc: clang, cxx: clang++}, {os: macos-latest, cc: cc, cxx: c++}, {os: macos-latest, cc: gcc-14, cxx: g++-14}, {os: windows-latest, cc: cl, cxx: cl} ]
+        config: [ {os: ubuntu-latest, toolchain: linux}, {os: ubuntu-latest, toolchain: linux-clang}, {os: macos-latest, toolchain: macos}, {os: macos-latest, toolchain: macos-brew-gcc14}, {os: macos-latest, toolchain: macos-brew-clang}, {os: windows-latest, toolchain: windows} ]
       fail-fast: false
     runs-on: ${{ matrix.config.os }}
     env:
       BUILD_DIR: build-release
       CMAKE_BUILD_TYPE: Release
       CTEST_OUTPUT_ON_FAILURE: 1
-      CC: ${{ matrix.config.cc }}
-      CXX: ${{ matrix.config.cxx }}
+      CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/cmake/toolchain/${{ matrix.config.toolchain }}.cmake
     steps:
     - name: Setup Linux tools
       if: ${{ runner.os == 'linux' }}
@@ -30,7 +29,7 @@ jobs:
         echo "CTEST_TEST_LOAD=$CORES" >> $GITHUB_ENV
         echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
     - name: Install MacOS tools
-      if: ${{ runner.os == 'macOS' }}
+      if: ${{ matrix.os == 'macOS' }}
       run: |
         brew install gcc cmake ninja python3 python-matplotlib
         CORES=$(sysctl -n hw.ncpu)
@@ -40,7 +39,13 @@ jobs:
         echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
     - name: Install Windows tools
       if: ${{ runner.os == 'windows' }}
-      run: C:/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/Common7/Tools/Launch-VsDevShell.ps1
+      run: |
+        dir "$env:programfiles"
+        dir "$env:programfiles/Microsoft Visual Studio"
+        dir "$env:programfiles/Microsoft Visual Studio/2022"
+        dir "$env:programfiles/Microsoft Visual Studio/2022/Enterprise"
+        dir "$env:programfiles/Microsoft Visual Studio/2022/Enterprise/Common7"
+        & "$env:programfiles/Microsoft Visual Studio/2022/Enterprise/Common7/Tools/Launch-VsDevShell.ps1"
     - uses: actions/checkout@v4
     - name: Configure
       run: cmake -B "$BUILD_DIR" -DSUM_WITH_TESTS_FAIL=ON
