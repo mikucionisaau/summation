@@ -1,8 +1,8 @@
-find_package(tbb QUIET) # Thread Building Blocks (parallel execution) library
+find_package(TBB QUIET) # Thread Building Blocks (parallel execution) library
 
-if (tbb_FOUND)
-  message(STATUS "Found TBB: ${tbb_DIR}")
-else(tbb_FOUND)
+if (TBB_FOUND)
+  message(STATUS "Found TBB: ${TBB_DIR}")
+else(TBB_FOUND)
   include(FetchContent)
   message(STATUS "Failed to find TBB, going to compile from source.")
   if (FIND_FATAL)
@@ -42,4 +42,4 @@ else(tbb_FOUND)
     #add_subdirectory(${tbb_SOURCE_DIR} ${tbb_BINARY_DIR} EXCLUDE_FROM_ALL)
     message(STATUS "Got TBB: ${tbb_SOURCE_DIR}")
   endif()
-endif(tbb_FOUND)
+endif(TBB_FOUND)
