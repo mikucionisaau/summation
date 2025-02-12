@@ -2,7 +2,18 @@ cmake_minimum_required(VERSION 3.25)
 project(summation)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+  message(STATUS "Disabling PARALLEL implementations (libc++/AppleClang can't handle it")
   set(SUM_PARALLEL OFF) # "no member named 'par' in namespace 'std::execution'"
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL Darwin AND CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+  message(STATUS "Disabling PARALLEL implementations (libc++/Clang can't handle it")
+  set(SUM_PARALLEL OFF) # "no member named 'par' in namespace 'std::execution'"
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL Darwin AND CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+  message(STATUS "Disabling FASTMATH implementations (GCC/Darwin can't handle it")
+  set(SUM_FASTMATH OFF) # clang: error: unsupported argument 'apple-m3' to option '-mtune='
 endif()
 
 option(SUM_WITH_TESTS "Unit Tests" ON)
