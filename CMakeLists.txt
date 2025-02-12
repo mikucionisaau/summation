@@ -16,6 +16,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL Darwin AND CMAKE_CXX_COMPILER_ID STREQUAL GNU)
   set(SUM_FASTMATH OFF) # clang: error: unsupported argument 'apple-m3' to option '-mtune='
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
+  message(STATUS "Disabling SIMD implementations (MSVC can't handle EVE library")
+  set(SUM_SIMD OFF)
+endif()
+
 option(SUM_WITH_TESTS "Unit Tests" ON)
 option(SUM_WITH_TESTS_FAIL "Expect specific tests to fail" OFF)
 option(SUM_WITH_BENCHMARKS "Benchmarks" ON)
