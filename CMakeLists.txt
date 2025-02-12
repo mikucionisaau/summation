@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 project(summation)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+  set(SUM_PARALLEL OFF) # "no member named 'par' in namespace 'std::execution'"
+endif()
+
 option(SUM_WITH_TESTS "Unit Tests" ON)
 option(SUM_WITH_TESTS_FAIL "Expect specific tests to fail" OFF)
 option(SUM_WITH_BENCHMARKS "Benchmarks" ON)
