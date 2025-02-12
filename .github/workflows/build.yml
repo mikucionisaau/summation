@@ -22,7 +22,7 @@ jobs:
     - name: Setup Linux tools
       if: ${{ runner.os == 'linux' }}
       run: |
-        sudo apt-get -qq update && sudo apt-get -qq install gcc g++ gcc-14 g++-14 clang-19 cmake ninja-build python3 python3-matplotlib python3-pandas
+        sudo apt-get -qq update && sudo apt-get -qq install gcc g++ gcc-14 g++-14 clang-19 cmake ninja-build libtbb-dev python3
         CORES=$(nproc)
         echo "CMAKE_BUILD_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
         echo "CTEST_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
@@ -31,7 +31,7 @@ jobs:
     - name: Install MacOS tools
       if: ${{ matrix.os == 'macOS' }}
       run: |
-        brew install gcc cmake ninja tbb python3 python-matplotlib python-packaging
+        brew install gcc cmake ninja tbb python3 python-matplotlib
         CORES=$(sysctl -n hw.ncpu)
         echo "CMAKE_BUILD_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
         echo "CTEST_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
@@ -46,6 +46,12 @@ jobs:
         dir "$env:programfiles/Microsoft Visual Studio/2022/Enterprise"
         dir "$env:programfiles/Microsoft Visual Studio/2022/Enterprise/Common7"
         & "$env:programfiles/Microsoft Visual Studio/2022/Enterprise/Common7/Tools/Launch-VsDevShell.ps1"
+    - name: Install Python Tools
+      run: |
+        python3 -m venv venv
+        source ./venv/bin/activate
+        pip install --upgrade pip
+        pip install pandas matplotlib
     - uses: actions/checkout@v4
     - name: Configure
       run: cmake -B "${{ env.BUILD_DIR }}" -DSUM_WITH_TESTS_FAIL=ON
@@ -56,7 +62,9 @@ jobs:
     - name: Benchmark
       run: ctest --test-dir "${{ env.BUILD_DIR }}" -C "${{ env.CMAKE_BUILD_TYPE }}" -R ".*_bm"
     - name: Plot benchmark results
-      run: ./tests/plot.py --logx --logy --output "${{ env.BUILD_DIR }}/tests/plot.png" "${{ env.BUILD_DIR }}/tests"/*.json
+      run: |
+        source ./venv/bin/activate
+        ./tests/plot.py --logx --logy --output "${{ env.BUILD_DIR }}/tests/plot.png" "${{ env.BUILD_DIR }}/tests"/*.json
     - name: Package benchmark results
       uses: actions/upload-artifact@v4
       with:
