@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        config: [ {os: ubuntu-latest, toolchain: linux-gcc14}, {os: ubuntu-latest, toolchain: linux-clang}, {os: macos-latest, toolchain: macos}, {os: macos-latest, toolchain: macos-brew-gcc14}, {os: macos-latest, toolchain: macos-brew-clang}, {os: windows-latest, toolchain: windows} ]
+        config: [ {os: ubuntu-latest, toolchain: linux-gcc14}, {os: ubuntu-latest, toolchain: linux-clang19}, {os: macos-latest, toolchain: macos}, {os: macos-latest, toolchain: macos-brew-gcc14}, {os: macos-latest, toolchain: macos-brew-clang}, {os: windows-latest, toolchain: windows} ]
       fail-fast: false
     runs-on: ${{ matrix.config.os }}
     env:
@@ -22,7 +22,7 @@ jobs:
     - name: Setup Linux tools
       if: ${{ runner.os == 'linux' }}
       run: |
-        sudo apt-get -qq update && sudo apt-get -qq install gcc g++ gcc-14 g++-14 clang cmake ninja-build python3 python3-matplotlib python3-pandas
+        sudo apt-get -qq update && sudo apt-get -qq install gcc g++ gcc-14 g++-14 clang-19 cmake ninja-build python3 python3-matplotlib python3-pandas
         CORES=$(nproc)
         echo "CMAKE_BUILD_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
         echo "CTEST_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
