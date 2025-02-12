@@ -33,12 +33,15 @@ if (SUM_WITH_TESTS_FAIL)
   endif(SUM_PARALLEL)
   if (SUM_FASTMATH)
     set_tests_properties(sum_transform_fm_test PROPERTIES WILL_FAIL TRUE)
-    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR
+        CMAKE_CXX_COMPILER_ID STREQUAL AppleClang OR
+        (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND CMAKE_SYSTEM_NAME STREQUAL Darwin))
       set_tests_properties(sum_reduce_fm_test PROPERTIES WILL_FAIL TRUE)
     endif()
   endif(SUM_FASTMATH)
   set_tests_properties(sum_loop_test sum_accumulate_test sum_vec2_test sum_vec4_test sum_vec8_test sum_vec16_test sum_vec_test sum_transform_test sum_reduce_test sum_transform_simd_test PROPERTIES WILL_FAIL TRUE)
-  if (CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL AppleClang OR
+      (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND CMAKE_SYSTEM_NAME STREQUAL Darwin))
     set_tests_properties(sum_loop_long_test sum_accumulate_long_test PROPERTIES WILL_FAIL TRUE)
   endif()
 endif (SUM_WITH_TESTS_FAIL)
