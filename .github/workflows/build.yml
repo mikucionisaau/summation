@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        config: [ {os: ubuntu-latest, cc: cc, cxx: c++}, {os: ubuntu-latest, cc: clang, cxx: clang++}, {os: macos-latest, cc: cc, cxx: c++}, {os: windows-latest, cc: cl, cxx: cl} ]
+    runs-on: ${{ matrix.config.os }}
+    env:
+      BUILD_DIR: build-release
+      CMAKE_BUILD_TYPE: Release
+      CC: ${{ matrix.config.cc }}
+      CXX: ${{ matrix.config.cxx }}
+    steps:
+    - name: Install Linux tools
+      if: ${{ runner.os == 'linux' }}
+      run: sudo apt-get -qq update && sudo apt-get -qq install gcc g++ clang cmake ninja-build python3 python3-matplotlib python3-pandas
+    - name: Install MacOS tools
+      if: ${{ runner.os == 'macOS' }}
+      run: brew install gcc cmake ninja-build python3 python3-matplotlib python3-pandas
+    - name: Install Windows tools
+      if: ${{ runner.os == 'windows' }}
+      run: Launch-VsDevShell.ps1
+    - uses: actions/checkout@v4
+    - name: Configure
+      run: cmake -B "$BUILD_DIR"
+    - name: Compile
+      run: cmake --build "${{ env.BUILD_DIR }}" --config "${{ env.CMAKE_BUILD_TYPE }}"
+    - name: Test
+      run: ctest --test-dir "${{ env.BUILD_DIR }}" -C "${{ env.CMAKE_BUILD_TYPE }}" -R ".*_test" && true
+    - name: Benchmark
+      run: ctest --test-dir "${{ env.BUILD_DIR }}" -C "${{ env.CMAKE_BUILD_TYPE }}" -R ".*_bm"
+    - name: Plot benchmark results
+      run: ./tests/plot.py --logx --logy --output "${{ env.BUILD_DIR }}/tests/plot.png" "${{ env.BUILD_DIR }}/tests/*.json"
+    - name: Package benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: |
+          ${{ env.BUILD_DIR }}/tests/plot.png
+          ${{ env.BUILD_DIR }}/tests/*.json
