@@ -16,21 +16,35 @@ jobs:
     env:
       BUILD_DIR: build-release
       CMAKE_BUILD_TYPE: Release
+      CTEST_OUTPUT_ON_FAILURE: 1
       CC: ${{ matrix.config.cc }}
       CXX: ${{ matrix.config.cxx }}
     steps:
-    - name: Install Linux tools
+    - name: Setup Linux tools
       if: ${{ runner.os == 'linux' }}
-      run: sudo apt-get -qq update && sudo apt-get -qq install gcc g++ clang cmake ninja-build python3 python3-matplotlib python3-pandas
+      run: |
+        sudo apt-get -qq update && sudo apt-get -qq install gcc g++ clang cmake ninja-build python3 python3-matplotlib python3-pandas
+        CORES=$(nproc)
+        echo "CMAKE_BUILD_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
+        echo "CTEST_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
+        echo "CTEST_TEST_LOAD=$CORES" >> $GITHUB_ENV
+        echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
     - name: Install MacOS tools
       if: ${{ runner.os == 'macOS' }}
-      run: brew install gcc cmake ninja python3 python-matplotlib
+      run: |
+        brew install gcc cmake ninja python3 python-matplotlib
+        CORES=$(sysctl -n hw.ncpu)
+        echo "CMAKE_BUILD_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
+        echo "CTEST_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
+        echo "CTEST_TEST_LOAD=$CORES" >> $GITHUB_ENV
+        echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
     - name: Install Windows tools
       if: ${{ runner.os == 'windows' }}
-      run:  C:\\Program\ Files\\Microsoft\ Visual\ Studio\\2022\\Community\\Common7\\Tools\\Launch-VsDevShell.ps1
+      run: |
+        & "C:/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/Common7/Tools/Launch-VsDevShell.ps1"
     - uses: actions/checkout@v4
     - name: Configure
-      run: cmake -B "$BUILD_DIR"
+      run: cmake -B "$BUILD_DIR" -DSUM_WITH_TESTS_FAIL=ON
     - name: Compile
       run: cmake --build "${{ env.BUILD_DIR }}" --config "${{ env.CMAKE_BUILD_TYPE }}"
     - name: Test

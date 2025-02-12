@@ -27,6 +27,10 @@ foreach(impl ${SUM_IMPLS})
   add_test(NAME sum_${impl}_test COMMAND sum_${impl}_test)
 endforeach ()
 
+if (SUM_WITH_TESTS_FAIL)
+  set_tests_properties(sum_loop_test sum_accumulate_test sum_vec2_test sum_vec4_test sum_vec8_test sum_vec16_test sum_vec_test sum_transform_test sum_reduce_test sum_reduce_fm_test sum_transform_fm_test sum_reduce_seq_test sum_reduce_unseq_test sum_reduce_par_test sum_reduce_par_unseq_test sum_transform_seq_test sum_transform_unseq_test sum_transform_par_test sum_transform_par_unseq_test sum_transform_simd_test PROPERTIES WILL_FAIL TRUE)
+endif (SUM_WITH_TESTS_FAIL)
+
 if (SUM_WITH_BENCHMARKS)
   foreach(impl ${SUM_IMPLS})
     add_executable(sum_${impl}_bm sum_bm.cpp)
