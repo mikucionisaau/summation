@@ -2,6 +2,7 @@
 #define SUM_OUTPUT_HPP
 
 #include <vector>
+#include <string>
 #include <iosfwd>  // ostream declarations only
 
 std::ostream& operator<<(std::ostream& os, const std::vector<double>& seq);
