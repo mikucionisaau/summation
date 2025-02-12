@@ -40,7 +40,7 @@ jobs:
         echo "CMAKE_GENERATOR=Ninja" >> $GITHUB_ENV
     - name: Install Windows tools
       if: ${{ runner.os == 'windows' }}
-      run: "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/Tools/Launch-VsDevShell.ps1"
+      run: C:/Program\ Files/Microsoft\ Visual\ Studio/2022/Community/Common7/Tools/Launch-VsDevShell.ps1
     - uses: actions/checkout@v4
     - name: Configure
       run: cmake -B "$BUILD_DIR" -DSUM_WITH_TESTS_FAIL=ON
@@ -55,7 +55,7 @@ jobs:
     - name: Package benchmark results
       uses: actions/upload-artifact@v4
       with:
-        name: benchmark-results
+        name: benchmarks-${{ matrix.os }}-${{ matrix.cc }}
         path: |
           ${{ env.BUILD_DIR }}/tests/plot.png
           ${{ env.BUILD_DIR }}/tests/*.json

@@ -2,7 +2,7 @@ find_package(tbb QUIET) # Thread Building Blocks (parallel execution) library
 
 if (tbb_FOUND)
   message(STATUS "Found TBB: ${tbb_DIR}")
-else(eve_FOUND)
+else(tbb_FOUND)
   include(FetchContent)
   message(STATUS "Failed to find TBB, going to compile from source.")
   if (FIND_FATAL)
@@ -24,8 +24,8 @@ else(eve_FOUND)
   set(TBB_FUZZ_TESTING OFF CACHE BOOL "Enable fuzz testing")
   set(TBB_INSTALL OFF CACHE BOOL "Enable installation")
   FetchContent_Declare(tbb
-    GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
-    GIT_TAG v2021.11.0
+    GIT_REPOSITORY https://github.com/uxlfoundation/oneTBB
+    GIT_TAG v2022.0.0
     GIT_SHALLOW TRUE # get only the last commit version
     GIT_PROGRESS TRUE # show progress of download
     # FIND_PACKAGE_ARGS NAMES benchmark

@@ -20,7 +20,7 @@ METRICS = [
 ]
 TRANSFORMS = {"": lambda x: x, "inverse": lambda x: 1.0 / x}
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(1,1,figsize=(16,9))
 map_legend_to_ax = {}  # Will map legend lines to original lines.
 
 def get_default_ylabel(args):

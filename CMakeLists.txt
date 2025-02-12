@@ -18,7 +18,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # generates compile_commands.json
 
 if (SUM_PARALLEL)
-  include(cmake/tbb.cmake)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+    include(cmake/tbb.cmake)
+    set(SUM_USING_TBB TRUE)
+  endif()
 endif (SUM_PARALLEL)
 
 if (SUM_SIMD)
