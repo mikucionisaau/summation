@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         config: [ {os: ubuntu-latest, cc: cc, cxx: c++}, {os: ubuntu-latest, cc: clang, cxx: clang++}, {os: macos-latest, cc: cc, cxx: c++}, {os: windows-latest, cc: cl, cxx: cl} ]
+      fail-fast: false
     runs-on: ${{ matrix.config.os }}
     env:
       BUILD_DIR: build-release
@@ -23,10 +24,10 @@ jobs:
       run: sudo apt-get -qq update && sudo apt-get -qq install gcc g++ clang cmake ninja-build python3 python3-matplotlib python3-pandas
     - name: Install MacOS tools
       if: ${{ runner.os == 'macOS' }}
-      run: brew install gcc cmake ninja-build python3 python3-matplotlib python3-pandas
+      run: brew install gcc cmake ninja python3 python-matplotlib
     - name: Install Windows tools
       if: ${{ runner.os == 'windows' }}
-      run: Launch-VsDevShell.ps1
+      run:  C:\\Program\ Files\\Microsoft\ Visual\ Studio\\2022\\Community\\Common7\\Tools\\Launch-VsDevShell.ps1
     - uses: actions/checkout@v4
     - name: Configure
       run: cmake -B "$BUILD_DIR"
