@@ -18,11 +18,18 @@ jobs:
       CMAKE_BUILD_TYPE: Release
       CTEST_OUTPUT_ON_FAILURE: 1
       CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/cmake/toolchain/${{ matrix.config.toolchain }}.cmake
+      PYTHON_ENV: ${{ github.workspace }}/venv
     steps:
     - name: Setup Linux tools
       if: ${{ runner.os == 'linux' }}
       run: |
         sudo apt-get -qq update && sudo apt-get -qq install gcc g++ gcc-14 g++-14 clang-19 cmake ninja-build libtbb-dev python3
+        python3 -m venv ${{ env.PYTHON_ENV }}
+        source ${{ env.PYTHON_ENV }}/bin/activate
+        pip install --upgrade pip
+        pip install pandas matplotlib
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
         CORES=$(nproc)
         echo "CMAKE_BUILD_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
         echo "CTEST_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
@@ -31,7 +38,13 @@ jobs:
     - name: Install MacOS tools
       if: ${{ matrix.os == 'macOS' }}
       run: |
-        brew install gcc cmake ninja tbb python3 python-matplotlib
+        brew install gcc cmake ninja tbb python3
+        python3 -m venv ${{ env.PYTHON_ENV }}
+        source ${{ env.PYTHON_ENV }}/bin/activate
+        pip install --upgrade pip
+        pip install pandas matplotlib
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
         CORES=$(sysctl -n hw.ncpu)
         echo "CMAKE_BUILD_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
         echo "CTEST_PARALLEL_LEVEL=$CORES" >> $GITHUB_ENV
@@ -40,18 +53,7 @@ jobs:
     - name: Install Windows tools
       if: ${{ runner.os == 'windows' }}
       run: |
-        dir "$env:programfiles"
-        dir "$env:programfiles/Microsoft Visual Studio"
-        dir "$env:programfiles/Microsoft Visual Studio/2022"
-        dir "$env:programfiles/Microsoft Visual Studio/2022/Enterprise"
-        dir "$env:programfiles/Microsoft Visual Studio/2022/Enterprise/Common7"
-        & "$env:programfiles/Microsoft Visual Studio/2022/Enterprise/Common7/Tools/Launch-VsDevShell.ps1"
-    - name: Install Python Tools
-      run: |
-        python3 -m venv venv
-        source ./venv/bin/activate
-        pip install --upgrade pip
-        pip install pandas matplotlib
+        python3 --version
     - uses: actions/checkout@v4
     - name: Configure
       run: cmake -B "${{ env.BUILD_DIR }}" -DSUM_WITH_TESTS_FAIL=ON
@@ -62,9 +64,7 @@ jobs:
     - name: Benchmark
       run: ctest --test-dir "${{ env.BUILD_DIR }}" -C "${{ env.CMAKE_BUILD_TYPE }}" -R ".*_bm"
     - name: Plot benchmark results
-      run: |
-        source ./venv/bin/activate
-        ./tests/plot.py --logx --logy --output "${{ env.BUILD_DIR }}/tests/plot.png" "${{ env.BUILD_DIR }}/tests"/*.json
+      run: python3 ./tests/plot.py --logx --logy --output "${{ env.BUILD_DIR }}/tests/plot.png" "${{ env.BUILD_DIR }}/tests"/*.json
     - name: Package benchmark results
       uses: actions/upload-artifact@v4
       with:
@@ -72,3 +72,5 @@ jobs:
         path: |
           ${{ env.BUILD_DIR }}/tests/plot.png
           ${{ env.BUILD_DIR }}/tests/*.json
+
+# & "$env:programfiles/Microsoft Visual Studio/2022/Enterprise/Common7/Tools/Launch-VsDevShell.ps1"

@@ -1,23 +1,34 @@
 cmake_minimum_required(VERSION 3.25)
-project(summation)
+project(summation LANGUAGES C CXX)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
-  message(STATUS "Disabling PARALLEL implementations (libc++/AppleClang can't handle it")
-  set(SUM_PARALLEL OFF) # "no member named 'par' in namespace 'std::execution'"
+if (NOT "cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+  message(FATAL_ERROR "Compiler does not support C++23")
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL Darwin AND CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-  message(STATUS "Disabling PARALLEL implementations (libc++/Clang can't handle it")
-  set(SUM_PARALLEL OFF) # "no member named 'par' in namespace 'std::execution'"
-endif()
+include(CheckSourceCompiles)
+check_source_compiles(CXX
+  "#include <version>
+  #if !defined(__cpp_lib_execution) || __cpp_lib_execution < 201603L
+  #error \"execution policies are not supported\"
+  #endif
+  int main() { return 0; }"
+  SUM_PARALLEL)
+
+check_source_compiles(CXX
+  "#include <version>
+  #if !defined(__cpp_lib_execution) || __cpp_lib_execution < 201902L
+  #error \"unsequenced policy is not supported\"
+  #endif
+  int main() { return 0; }"
+  SUM_UNSEQ)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Darwin AND CMAKE_CXX_COMPILER_ID STREQUAL GNU)
-  message(STATUS "Disabling FASTMATH implementations (GCC/Darwin can't handle it")
+  message(STATUS "Disabling FASTMATH implementations (GCC/Darwin can't handle)")
   set(SUM_FASTMATH OFF) # clang: error: unsupported argument 'apple-m3' to option '-mtune='
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
-  message(STATUS "Disabling SIMD implementations (MSVC can't handle EVE library")
+  message(STATUS "Disabling SIMD implementations (MSVC can't handle EVE library)")
   set(SUM_SIMD OFF)
 endif()
 

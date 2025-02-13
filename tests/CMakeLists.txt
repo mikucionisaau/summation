@@ -13,9 +13,12 @@ if (SUM_FASTMATH)
 endif (SUM_FASTMATH)
 
 if (SUM_PARALLEL)
-  set(SUM_IMPLS ${SUM_IMPLS} reduce_seq reduce_unseq reduce_par reduce_par_unseq
-          transform_seq transform_unseq transform_par transform_par_unseq)
+  set(SUM_IMPLS ${SUM_IMPLS} reduce_par reduce_par_unseq transform_par transform_par_unseq)
 endif (SUM_PARALLEL)
+
+if (SUM_UNSEQ)
+  set(SUM_IMPLS ${SUM_IMPLS} reduce_seq reduce_unseq transform_seq transform_unseq)
+endif (SUM_UNSEQ)
 
 if (SUM_SIMD)
   set(SUM_IMPLS ${SUM_IMPLS} reduce_simd transform_simd)
@@ -29,8 +32,11 @@ endforeach ()
 
 if (SUM_WITH_TESTS_FAIL)
   if (SUM_PARALLEL)
-    set_tests_properties(sum_reduce_seq_test sum_reduce_unseq_test sum_reduce_par_test sum_reduce_par_unseq_test sum_transform_seq_test sum_transform_unseq_test sum_transform_par_test sum_transform_par_unseq_test PROPERTIES WILL_FAIL TRUE)
+    set_tests_properties(sum_reduce_par_test sum_reduce_par_unseq_test sum_transform_par_test sum_transform_par_unseq_test PROPERTIES WILL_FAIL TRUE)
   endif(SUM_PARALLEL)
+  if (SUM_UNSEQ)
+    set_tests_properties(sum_reduce_seq_test sum_reduce_unseq_test sum_transform_seq_test sum_transform_unseq_test PROPERTIES WILL_FAIL TRUE)
+  endif(SUM_UNSEQ)
   if (SUM_FASTMATH)
     set_tests_properties(sum_transform_fm_test PROPERTIES WILL_FAIL TRUE)
     if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR
