@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 project(summation LANGUAGES C CXX)
 
+message(STATUS "Configuring for ${CMAKE_SYSTEM_NAME} using ${CMAKE_CXX_COMPILER_ID}")
+
 if (NOT "cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
   message(FATAL_ERROR "Compiler does not support C++23")
 endif()
